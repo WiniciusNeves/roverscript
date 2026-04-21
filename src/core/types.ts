@@ -1,0 +1,35 @@
+export enum TokenType {
+  ILLEGAL = "ILLEGAL",
+  EOF = "EOF",
+
+  IDENT = "IDENT",
+  INT = "INT",
+  STRING = "STRING",
+
+  ASSIGN = "=",
+  LPAREN = "(",
+  RPAREN = ")",
+  LBRACE = "{",
+  RBRACE = "}",
+  COMMA = ",",
+
+  MISSION = "MISSION",
+  LET = "LET",
+  IF = "IF",
+  REPEAT = "REPEAT",
+  MOVE = "MOVE",
+  BACK = "BACK",
+  TURN = "TURN",
+  DETECT = "DETECT",
+  OBSTACLE = "OBSTACLE"
+}
+
+export interface Token {
+  type: TokenType;
+  literal: string;
+}
+
+export interface AST {
+  type: string;
+  tokenLiteral(): string;
+}
