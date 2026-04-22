@@ -11,7 +11,7 @@ const keywords: Record<string, TokenType> = {
   turn: TokenType.TURN,
   detect: TokenType.DETECT,
   obstacle: TokenType.OBSTACLE,
-  place_obstacle: TokenType.PLACE_OBSTACLE
+  placeObstacle: TokenType.PLACE_OBSTACLE
 };
 
 export class Lexer {
