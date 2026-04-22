@@ -1,3 +1,10 @@
-PLACE OBSTACLE 2 2
-MOVE FORWARD
-MOVE FORWARD
+placeObstacle(0, 2)
+
+move(2)
+
+if (obstacle) {
+  turn("right")
+  move(1)
+} else {
+  move(1)
+}

@@ -1,0 +1,7 @@
+repeat(3) {
+  if (obstacle) {
+    turn("right")
+  } else {
+    move(1)
+  }
+}
