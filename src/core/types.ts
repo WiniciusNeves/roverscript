@@ -21,7 +21,9 @@ export enum TokenType {
   BACK = "BACK",
   TURN = "TURN",
   DETECT = "DETECT",
-  OBSTACLE = "OBSTACLE"
+  OBSTACLE = "OBSTACLE",
+  PLACE_OBSTACLE = "PLACE_OBSTACLE",
+  ELSE = "ELSE"
 }
 
 export interface Token {

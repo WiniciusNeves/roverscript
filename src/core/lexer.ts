@@ -4,12 +4,14 @@ const keywords: Record<string, TokenType> = {
   mission: TokenType.MISSION,
   let: TokenType.LET,
   if: TokenType.IF,
+  else: TokenType.ELSE,
   repeat: TokenType.REPEAT,
   move: TokenType.MOVE,
   back: TokenType.BACK,
   turn: TokenType.TURN,
   detect: TokenType.DETECT,
   obstacle: TokenType.OBSTACLE,
+  place_obstacle: TokenType.PLACE_OBSTACLE
 };
 
 export class Lexer {

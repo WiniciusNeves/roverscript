@@ -58,6 +58,14 @@ export class Parser {
         return this.parseMoveStatement();
       case TokenType.TURN:
         return this.parseTurnStatement();
+      case TokenType.REPEAT:
+        return this.parseRepeatStatement();
+      case TokenType.IF:
+        return this.parseIfStatement();
+      case TokenType.ELSE:
+          return this.parseIfStatement();
+      case TokenType.PLACE_OBSTACLE:
+        return this.parsePlaceObstacleStatement();
       default:
         return null;
     }
@@ -127,7 +135,7 @@ export class Parser {
     if (this.currentToken.type === TokenType.STRING) {
       return new StringLiteral(this.currentToken, this.currentToken.literal);
     }
-    if (this.currentToken.type === TokenType.IDENT) {
+    if (this.currentToken.type === TokenType.IDENT || this.currentToken.type === TokenType.OBSTACLE) {
       return new Identifier(this.currentToken, this.currentToken.literal);
     }
     return null;
@@ -146,5 +154,83 @@ export class Parser {
   private peekError(type: TokenType): void {
     const msg = `Esperado próximo token ser ${type}, mas foi ${this.peekToken.type}`;
     this.errors.push(msg);
+  }
+  private parseBlockStatement(): any { 
+    const token = this.currentToken;
+    const statements: Statement[] = [];
+
+    this.nextToken();
+
+    while(this.currentToken.type !== TokenType.RBRACE && this.currentToken.type !== TokenType.EOF) {
+      const stmt = this.parseStatement();
+      if (stmt !== null) {
+        statements.push(stmt);
+      }
+      this.nextToken();
+    }
+
+    return { type: "BlockStatement", token, statements };
+  }
+
+  private parseRepeatStatement(): any {
+    const token = this.currentToken;
+    if (!this.expectPeek(TokenType.LPAREN)) {
+      return null;
+    }
+    this.nextToken();
+    const count = this.parseExpression();
+    if (!this.expectPeek(TokenType.RPAREN)) {
+      return null;
+    } 
+    if (!this.expectPeek(TokenType.LBRACE)) {
+      return null;
+    }
+    const body = this.parseBlockStatement();
+
+    return { type: "RepeatStatement", token, count, body };
+  }
+
+  private parseIfStatement(): any {
+    const token = this.currentToken;
+    if (!this.expectPeek(TokenType.LPAREN)) {
+      return null;
+    }
+    this.nextToken();
+    const condition = this.parseExpression();
+    if (!this.expectPeek(TokenType.RPAREN)) {
+      return null;
+    }
+    if (!this.expectPeek(TokenType.LBRACE)) {
+      return null;
+    }
+    const consequence = this.parseBlockStatement();
+
+    let alternative = null;
+    if (this.peekToken.type === TokenType.ELSE) {
+      this.nextToken();
+      if (!this.expectPeek(TokenType.LBRACE)) {
+        return null;
+      }
+      alternative = this.parseBlockStatement();
+    }
+
+    return { type: "IfStatement", token, condition, consequence, alternative };
+  }
+  private parsePlaceObstacleStatement(): any {
+    const token = this.currentToken;
+
+    if (!this.expectPeek(TokenType.LPAREN)) return null;
+    
+    this.nextToken();
+    const x = this.parseExpression();
+
+    if (!this.expectPeek(TokenType.COMMA)) return null;
+    
+    this.nextToken();
+    const y = this.parseExpression();
+
+    if (!this.expectPeek(TokenType.RPAREN)) return null;
+
+    return { type: "PlaceObstacleStatement", token, x, y };
   }
 }

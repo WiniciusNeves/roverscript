@@ -110,3 +110,19 @@ export class StringLiteral implements Expression {
   expressionNode(): void {}
   tokenLiteral(): string { return this.token.literal; }
 }
+
+export class PlaceObstacleStatement implements Statement {
+  type = "PlaceObstacleStatement"
+  token: Token;
+  x: Expression
+  y: Expression;
+
+  constructor(token: Token, x: Expression, y: Expression) {
+    this.token = token;
+    this.x = x;
+    this.y = y;
+  }
+
+  statementNode(): void {}
+  tokenLiteral(): string { return this.token.literal; }
+}

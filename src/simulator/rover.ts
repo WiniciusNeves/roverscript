@@ -9,6 +9,7 @@ export class Rover {
   private x: number;
   private y: number;
   private direction: Direction;
+  private obstacles: Set<string>;
 
   private static readonly COMPASS: Direction[] = ["N", "E", "S", "W"];
 
@@ -16,6 +17,23 @@ export class Rover {
     this.x = startX;
     this.y = startY;
     this.direction = startDirection;
+    this.obstacles = new Set();
+  }
+
+  public addObstacle(x: number, y: number): void {
+    this.obstacles.add(`${x},${y}`);
+  }
+
+  public detectObstacle(x: number, y: number): boolean {
+   let nextX = this.x;
+   let nextY = this.y;
+
+   if (this.direction === "N") nextY += 1;
+   if (this.direction === "E") nextX += 1;
+   if (this.direction === "S") nextY -= 1;
+   if (this.direction === "W") nextX -= 1;
+   
+   return this.obstacles.has(`${nextX},${nextY}`);  
   }
 
   public getState(): { position: Position; direction: Direction } {
@@ -39,19 +57,15 @@ export class Rover {
   }
 
   public move(steps: number): void {
-    switch (this.direction) {
-      case "N":
-        this.y += steps;
+    for (let i = 0; i < steps; i++) {
+      if (this.detectObstacle(this.x, this.y)) {
+        console.warn(`[AVISO] Obstáculo detectado em (${this.x}, ${this.y}). Movimento interrompido.`);
         break;
-      case "E":
-        this.x += steps;
-        break;
-      case "S":
-        this.y -= steps;
-        break;
-      case "W":
-        this.x -= steps;
-        break;
+      }
+      if (this.direction === "N") this.y += 1;
+      if (this.direction === "E") this.x += 1;
+      if (this.direction === "S") this.y -= 1;
+      if (this.direction === "W") this.x -= 1;
     }
   }
 }

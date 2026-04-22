@@ -37,20 +37,20 @@ function main() {
 
   const env = new Environment();
   const rover = new Rover(0, 0, "N");
-
+  
   console.log("[SISTEMA] Iniciando simulação...");
   console.log(`[ESTADO INICIAL] Posição: (0, 0), Direção: N`);
 
-  const commandStream = interpret(program, env);
+  const commandStream = interpret(program, env, rover);
 
-  for (const command of commandStream) {
-    if (command.type === "Move") {
-      rover.move(command.payload);
-      console.log(`[AÇÃO] Movendo ${command.payload} passos.`);
-    } 
-    else if (command.type === "Turn") {
-      rover.turn(command.payload);
-      console.log(`[AÇÃO] Virando para a ${command.payload}.`);
+  if (commandStream && Array.isArray(commandStream)) {
+    for (const command of commandStream) {
+      if (command.type === "Move") {
+        console.log(`[AÇÃO] Movendo ${command.payload} passos.`);
+      } 
+      else if (command.type === "Turn") {
+        console.log(`[AÇÃO] Virando para a ${command.payload}.`);
+      }
     }
   }
 
