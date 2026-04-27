@@ -1,7 +1,7 @@
 {
   "name": "roverscript",
   "version": "1.0.0",
-  "type": "module", 
+  "type": "module",
   "description": "",
   "scripts": {
     "cli": "tsx src/cli/run.ts",
@@ -13,12 +13,17 @@
     "@types/node": "^25.6.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@types/styled-components": "^5.1.36",
+    "autoprefixer": "^10.5.0",
+    "postcss": "^8.5.10",
+    "tailwindcss": "^4.2.4",
     "tsx": "^4.21.0",
     "typescript": "^6.0.3"
   },
   "dependencies": {
     "next": "^16.2.4",
     "react": "^19.2.5",
-    "react-dom": "^19.2.5"
+    "react-dom": "^19.2.5",
+    "styled-components": "^6.4.1"
   }
 }
