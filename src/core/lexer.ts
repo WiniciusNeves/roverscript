@@ -19,6 +19,8 @@ export class Lexer {
   private position: number = 0;
   private readPosition: number = 0;
   private ch: string = "";
+  private line: number = 1;
+  private column: number = 0;
 
   constructor(input: string) {
     this.input = input;
@@ -59,9 +61,10 @@ export class Lexer {
         if (this.isLetter(this.ch)) {
           const literal = this.readIdentifier();
           const type = this.lookupIdent(literal);
-          return this.newToken(type, literal);
+          return { type, literal, line: this.line, column: this.column - literal.length };
         } else if (this.isDigit(this.ch)) {
-          return this.newToken(TokenType.INT, this.readNumber());
+          const literal = this.readNumber();
+          return { type: TokenType.INT, literal, line: this.line, column: this.column - literal.length };
         } else {
           token = this.newToken(TokenType.ILLEGAL, this.ch);
         }
@@ -72,6 +75,11 @@ export class Lexer {
   }
 
   private readChar(): void {
+    if (this.ch === "\n") {
+      this.line++;
+      this.column = 0;
+    }
+
     if (this.readPosition >= this.input.length) {
       this.ch = "\0";
     } else {
@@ -79,6 +87,7 @@ export class Lexer {
     }
     this.position = this.readPosition;
     this.readPosition += 1;
+    this.column += 1;
   }
 
   private readIdentifier(): string {
@@ -134,6 +143,6 @@ export class Lexer {
   }
 
   private newToken(type: TokenType, literal: string): Token {
-    return { type, literal };
+    return { type, literal, line: this.line, column: this.column };
   }
 }

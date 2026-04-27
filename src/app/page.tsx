@@ -8,7 +8,7 @@ import {
   EditorSplit, 
   LeftPane, 
   RightPane 
-} from "./theme/styles"; // Ajuste o caminho (../ ou ./) se necessário
+} from "./theme/styles";
 import { Header } from "./components/Header";
 import { ActivityBar } from "./components/ActivityBar";
 import { Sidebar } from "./components/Sidebar";
@@ -122,7 +122,8 @@ const [isSimulatorOpen, setIsSimulatorOpen] = useState(true);
         }
 
       } else {
-        setLogs(data.errors.map((err: string) => `[ERRO] ${err}`));
+        const errorList = data.errors || ["Erro desconhecido na compilação."];
+        setLogs(errorList.map((err: string) => `[ERRO] ${err}`));
         setIsRunning(false);
       }
     } catch (error) {
@@ -130,7 +131,6 @@ const [isSimulatorOpen, setIsSimulatorOpen] = useState(true);
       setIsRunning(false);
     }
   };
-
   const toggleConsole = () => {
     setIsConsoleOpen(!isConsoleOpen);
   };

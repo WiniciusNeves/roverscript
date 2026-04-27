@@ -29,8 +29,9 @@ export enum TokenType {
 export interface Token {
   type: TokenType;
   literal: string;
+  line: number;
+  column: number;
 }
-
 export interface AST {
   type: string;
   tokenLiteral(): string;

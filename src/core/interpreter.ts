@@ -43,6 +43,20 @@ export function interpret(ast: any, env: Environment, rover: Rover): any {
     return null;
   }
 
+  if (ast.type === "ExpressionStatement") {
+    return interpret(ast.expression, env, rover);
+  }
+
+  if (ast.type === "Identifier") {
+    const value = env.get(ast.value);
+    
+    if (value === undefined && ast.value !== "obstacle") {
+      throw new Error(`Comando ou variável não reconhecida: '${ast.value}'`);
+    }
+    
+    return value;
+  }
+
   if (ast.type === "PlaceObstacleStatement") {
     const x = interpret(ast.x, env, rover);
     const y = interpret(ast.y, env, rover);
@@ -60,11 +74,10 @@ export function interpret(ast: any, env: Environment, rover: Rover): any {
     return null;
   }
 
-  if (ast.type === "Identifier") return env.get(ast.value);
   if (ast.type === "IntegerLiteral") return ast.value;
   if (ast.type === "StringLiteral") return ast.value;
 
- if (ast.type === "MoveStatement") {
+  if (ast.type === "MoveStatement") {
     const requestedSteps = interpret(ast.steps, env, rover);
     const actualSteps = rover.move(requestedSteps);
     return { type: "Move", payload: actualSteps, requested: requestedSteps };
@@ -76,5 +89,5 @@ export function interpret(ast: any, env: Environment, rover: Rover): any {
     return { type: "Turn", payload: direction };
   }
 
-  return null;
+  throw new Error(`Estrutura de código inválida ou não suportada pelo motor.`);
 }

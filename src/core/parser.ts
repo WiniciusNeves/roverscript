@@ -9,7 +9,7 @@ import {
   IntegerLiteral,
   StringLiteral,
   LetStatement,
-  Identifier
+  Identifier,
 } from "./ast";
 
 export class Parser {
@@ -20,8 +20,13 @@ export class Parser {
 
   constructor(lexer: Lexer) {
     this.lexer = lexer;
-    this.currentToken = { type: TokenType.EOF, literal: "" };
-    this.peekToken = { type: TokenType.EOF, literal: "" };
+    this.currentToken = {
+      type: TokenType.EOF,
+      literal: "",
+      line: 0,
+      column: 0,
+    };
+    this.peekToken = { type: TokenType.EOF, literal: "", line: 0, column: 0 };
 
     this.nextToken();
     this.nextToken();
@@ -63,10 +68,13 @@ export class Parser {
       case TokenType.IF:
         return this.parseIfStatement();
       case TokenType.ELSE:
-          return this.parseIfStatement();
+        return this.parseIfStatement();
       case TokenType.PLACE_OBSTACLE:
         return this.parsePlaceObstacleStatement();
       default:
+        this.errors.push(
+          `Linha ${this.currentToken.line}: Comando ou sintaxe não reconhecida '${this.currentToken.literal}'.`,
+        );
         return null;
     }
   }
@@ -74,18 +82,13 @@ export class Parser {
   private parseLetStatement(): LetStatement | null {
     const token = this.currentToken;
 
-    if (!this.expectPeek(TokenType.IDENT)) {
-      return null;
-    }
+    if (!this.expectPeek(TokenType.IDENT)) return null;
 
     const name = new Identifier(this.currentToken, this.currentToken.literal);
 
-    if (!this.expectPeek(TokenType.ASSIGN)) {
-      return null;
-    }
+    if (!this.expectPeek(TokenType.ASSIGN)) return null;
 
     this.nextToken();
-
     const value = this.parseExpression();
 
     return new LetStatement(token, name, value as Expression);
@@ -94,17 +97,12 @@ export class Parser {
   private parseMoveStatement(): MoveStatement | null {
     const token = this.currentToken;
 
-    if (!this.expectPeek(TokenType.LPAREN)) {
-      return null;
-    }
+    if (!this.expectPeek(TokenType.LPAREN)) return null;
 
     this.nextToken();
-
     const steps = this.parseExpression();
 
-    if (!this.expectPeek(TokenType.RPAREN)) {
-      return null;
-    }
+    if (!this.expectPeek(TokenType.RPAREN)) return null;
 
     return new MoveStatement(token, steps as Expression);
   }
@@ -112,17 +110,12 @@ export class Parser {
   private parseTurnStatement(): TurnStatement | null {
     const token = this.currentToken;
 
-    if (!this.expectPeek(TokenType.LPAREN)) {
-      return null;
-    }
+    if (!this.expectPeek(TokenType.LPAREN)) return null;
 
     this.nextToken();
-
     const direction = this.parseExpression();
 
-    if (!this.expectPeek(TokenType.RPAREN)) {
-      return null;
-    }
+    if (!this.expectPeek(TokenType.RPAREN)) return null;
 
     return new TurnStatement(token, direction as Expression);
   }
@@ -135,7 +128,10 @@ export class Parser {
     if (this.currentToken.type === TokenType.STRING) {
       return new StringLiteral(this.currentToken, this.currentToken.literal);
     }
-    if (this.currentToken.type === TokenType.IDENT || this.currentToken.type === TokenType.OBSTACLE) {
+    if (
+      this.currentToken.type === TokenType.IDENT ||
+      this.currentToken.type === TokenType.OBSTACLE
+    ) {
       return new Identifier(this.currentToken, this.currentToken.literal);
     }
     return null;
@@ -152,16 +148,20 @@ export class Parser {
   }
 
   private peekError(type: TokenType): void {
-    const msg = `Esperado próximo token ser ${type}, mas foi ${this.peekToken.type}`;
+    const msg = `Linha ${this.peekToken.line}: Esperava encontrar '${type}', mas encontrou '${this.peekToken.literal}'`;
     this.errors.push(msg);
   }
-  private parseBlockStatement(): any { 
+
+  private parseBlockStatement(): any {
     const token = this.currentToken;
     const statements: Statement[] = [];
 
     this.nextToken();
 
-    while(this.currentToken.type !== TokenType.RBRACE && this.currentToken.type !== TokenType.EOF) {
+    while (
+      this.currentToken.type !== TokenType.RBRACE &&
+      this.currentToken.type !== TokenType.EOF
+    ) {
       const stmt = this.parseStatement();
       if (stmt !== null) {
         statements.push(stmt);
@@ -174,61 +174,44 @@ export class Parser {
 
   private parseRepeatStatement(): any {
     const token = this.currentToken;
-    if (!this.expectPeek(TokenType.LPAREN)) {
-      return null;
-    }
+    if (!this.expectPeek(TokenType.LPAREN)) return null;
     this.nextToken();
     const count = this.parseExpression();
-    if (!this.expectPeek(TokenType.RPAREN)) {
-      return null;
-    } 
-    if (!this.expectPeek(TokenType.LBRACE)) {
-      return null;
-    }
-    const body = this.parseBlockStatement();
+    if (!this.expectPeek(TokenType.RPAREN)) return null;
+    if (!this.expectPeek(TokenType.LBRACE)) return null;
 
+    const body = this.parseBlockStatement();
     return { type: "RepeatStatement", token, count, body };
   }
 
   private parseIfStatement(): any {
     const token = this.currentToken;
-    if (!this.expectPeek(TokenType.LPAREN)) {
-      return null;
-    }
+    if (!this.expectPeek(TokenType.LPAREN)) return null;
     this.nextToken();
     const condition = this.parseExpression();
-    if (!this.expectPeek(TokenType.RPAREN)) {
-      return null;
-    }
-    if (!this.expectPeek(TokenType.LBRACE)) {
-      return null;
-    }
-    const consequence = this.parseBlockStatement();
+    if (!this.expectPeek(TokenType.RPAREN)) return null;
+    if (!this.expectPeek(TokenType.LBRACE)) return null;
 
+    const consequence = this.parseBlockStatement();
     let alternative = null;
+
     if (this.peekToken.type === TokenType.ELSE) {
       this.nextToken();
-      if (!this.expectPeek(TokenType.LBRACE)) {
-        return null;
-      }
+      if (!this.expectPeek(TokenType.LBRACE)) return null;
       alternative = this.parseBlockStatement();
     }
 
     return { type: "IfStatement", token, condition, consequence, alternative };
   }
+
   private parsePlaceObstacleStatement(): any {
     const token = this.currentToken;
-
     if (!this.expectPeek(TokenType.LPAREN)) return null;
-    
     this.nextToken();
     const x = this.parseExpression();
-
     if (!this.expectPeek(TokenType.COMMA)) return null;
-    
     this.nextToken();
     const y = this.parseExpression();
-
     if (!this.expectPeek(TokenType.RPAREN)) return null;
 
     return { type: "PlaceObstacleStatement", token, x, y };

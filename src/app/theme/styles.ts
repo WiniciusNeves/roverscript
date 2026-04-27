@@ -73,7 +73,7 @@ export const EditorHeader = styled.div`
 
 export const CustomTextArea = styled.textarea`
   flex: 1;
-  background-color: #1e1e1e;
+  background-color: transparent;
   color: #d4d4d4;
   border: none;
   padding: 20px;
@@ -407,3 +407,25 @@ export const RoverEntity = styled.div<{ $x: number; $y: number; $rotation: strin
   transform: rotate(${({ $rotation }) => $rotation});
   transition: left 0.4s ease-in-out, top 0.4s ease-in-out, transform 0.3s ease;
 `;
+
+export const EditorLayout = styled.div`
+  display: flex;
+  flex: 1;
+  background-color: #1e1e1e;
+  min-height: 0;
+  position: relative;
+`;
+
+export const LineNumbersColumn = styled.div`
+  padding: 20px 10px 20px 15px;
+  background-color: #1e1e1e;
+  color: #858585;
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 14px;
+  text-align: right;
+  border-right: 1px solid #2b2b2b;
+  user-select: none;
+  overflow: hidden;
+  line-height: 1.5;
+`;
+

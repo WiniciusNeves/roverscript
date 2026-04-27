@@ -1,9 +1,9 @@
-"use client";
-
-import { useRef, KeyboardEvent } from "react";
+import { useRef, KeyboardEvent, UIEvent } from "react";
 import { 
   EditorContainer, 
   EditorHeader, 
+  EditorLayout,
+  LineNumbersColumn,
   CustomTextArea, 
   FloatingToolbar, 
   FloatingButton 
@@ -19,6 +19,16 @@ interface Props {
 
 export function Editor({ fileName, code, setCode, onRun, isRunning }: Props) {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const linesRef = useRef<HTMLDivElement>(null);
+
+  const linesCount = code.split("\n").length;
+  const lines = Array.from({ length: Math.max(1, linesCount) }, (_, i) => i + 1);
+
+  const handleScroll = (e: UIEvent<HTMLTextAreaElement>) => {
+    if (linesRef.current) {
+      linesRef.current.scrollTop = e.currentTarget.scrollTop;
+    }
+  };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Tab") {
@@ -58,13 +68,22 @@ export function Editor({ fileName, code, setCode, onRun, isRunning }: Props) {
         </FloatingButton>
       </FloatingToolbar>
 
-      <CustomTextArea
-        ref={textAreaRef}
-        value={code}
-        onChange={(e) => setCode(e.target.value)}
-        onKeyDown={handleKeyDown}
-        spellCheck={false}
-      />
+      <EditorLayout>
+        <LineNumbersColumn ref={linesRef}>
+          {lines.map(num => (
+            <div key={num}>{num}</div>
+          ))}
+        </LineNumbersColumn>
+        
+        <CustomTextArea
+          ref={textAreaRef}
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onScroll={handleScroll}
+          spellCheck={false}
+        />
+      </EditorLayout>
     </EditorContainer>
   );
 }
