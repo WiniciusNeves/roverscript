@@ -64,10 +64,10 @@ export function interpret(ast: any, env: Environment, rover: Rover): any {
   if (ast.type === "IntegerLiteral") return ast.value;
   if (ast.type === "StringLiteral") return ast.value;
 
-  if (ast.type === "MoveStatement") {
-    const steps = interpret(ast.steps, env, rover);
-    rover.move(steps);
-    return { type: "Move", payload: steps };
+ if (ast.type === "MoveStatement") {
+    const requestedSteps = interpret(ast.steps, env, rover);
+    const actualSteps = rover.move(requestedSteps);
+    return { type: "Move", payload: actualSteps, requested: requestedSteps };
   }
 
   if (ast.type === "TurnStatement") {

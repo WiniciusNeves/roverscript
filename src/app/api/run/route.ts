@@ -11,18 +11,19 @@ export async function POST(request: Request) {
     const { code } = body;
 
     if (!code || typeof code !== "string") {
-      return NextResponse.json({ error: "Código inválido ou ausente." }, { status: 400 });
+      return NextResponse.json({ error: "Código inválido" }, { status: 400 });
     }
+
     const lexer = new Lexer(code);
     const parser = new Parser(lexer);
     const program = parser.parseProgram();
 
     const errors = parser.getErrors();
     if (errors.length > 0) {
-      return NextResponse.json({ 
-        success: false, 
-        errors: errors 
-      }, { status: 400 });
+      return NextResponse.json(
+        { success: false, errors: errors },
+        { status: 400 },
+      );
     }
 
     const env = new Environment();
@@ -34,28 +35,38 @@ export async function POST(request: Request) {
     if (commandStream && Array.isArray(commandStream)) {
       for (const command of commandStream) {
         if (command.type === "Move") {
-          rover.move(command.payload);
-          executionLogs.push(`Movendo ${command.payload} passos.`);
+          if (command.payload === command.requested) {
+            executionLogs.push(
+              `[AÇÃO] Movendo ${command.payload} passos com sucesso.`,
+            );
+          } else {
+            executionLogs.push(
+              `[ALERTA] Colisão/Borda detectada. Dos ${command.requested} passos, moveu apenas ${command.payload}.`,
+            );
+          }
         } else if (command.type === "Turn") {
-          rover.turn(command.payload);
-          executionLogs.push(`Virando para a ${command.payload}.`);
+          executionLogs.push(`[AÇÃO] Virando para a ${command.payload}.`);
+        } else if (command.type === "PlaceObstacle") {
+          executionLogs.push(
+            `[SISTEMA] Obstáculo criado em (${command.payload.x}, ${command.payload.y}).`,
+          );
         }
       }
     }
 
     const finalState = rover.getState();
 
-    return NextResponse.json({
+  return NextResponse.json({
       success: true,
-      commands: commandStream || [],
       logs: executionLogs,
-      finalState: finalState
+      finalState: finalState,
+      obstacles: rover.getObstacles ? rover.getObstacles() : [],
+      history: rover.history
     });
-
   } catch (error: any) {
-    return NextResponse.json({ 
-      success: false, 
-      errors: [error.message] 
-    }, { status: 500 });
+    return NextResponse.json(
+      { success: false, errors: [error.message] },
+      { status: 500 },
+    );
   }
 }
