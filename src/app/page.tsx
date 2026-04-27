@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { 
-  IDEContainer, 
-  Workspace, 
-  MainContent, 
-  EditorSplit, 
-  LeftPane, 
-  RightPane 
+import {
+  IDEContainer,
+  Workspace,
+  MainContent,
+  EditorSplit,
+  LeftPane,
+  RightPane,
 } from "./theme/styles";
 import { Header } from "./components/Header";
 import { ActivityBar } from "./components/ActivityBar";
@@ -29,16 +29,40 @@ export default function Home() {
   ]);
   const [isRunning, setIsRunning] = useState(false);
   const [isConsoleOpen, setIsConsoleOpen] = useState(true);
-const [isSimulatorOpen, setIsSimulatorOpen] = useState(true);
-  const [roverState, setRoverState] = useState({ position: { x: 0, y: 0 }, direction: 'N' });
+  const [isSimulatorOpen, setIsSimulatorOpen] = useState(true);
+  const [roverState, setRoverState] = useState({
+    position: { x: 0, y: 0 },
+    direction: "N",
+  });
   const [obstacles, setObstacles] = useState<string[]>([]);
 
   const [files, setFiles] = useState<File[]>([
-    { id: "basic", name: "basic.rvx", content: 'move(2)\nturn("right")\nmove(1)' },
-    { id: "if", name: "if.rvx", content: 'if (obstacle) {\n  turn("right")\n} else {\n  move(1)\n}' },
-    { id: "loop", name: "loop.rvx", content: 'repeat(4) {\n  move(1)\n  turn("left")\n}' },
-    { id: "mission", name: "mission.rvx", content: 'let steps = 5\nmove(steps)\nturn("right")\nmove(2)' },
-    { id: "obstacle", name: "obstacle.rvx", content: 'placeObstacle(0, 2)\n\nmove(2)\n\nif (obstacle) {\n  turn("right")\n  move(1)\n} else {\n  move(1)\n}' }
+    {
+      id: "basic",
+      name: "basic.rvx",
+      content: 'move(2)\nturn("right")\nmove(1)',
+    },
+    {
+      id: "if",
+      name: "if.rvx",
+      content: 'if (obstacle) {\n  turn("right")\n} else {\n  move(1)\n}',
+    },
+    {
+      id: "loop",
+      name: "loop.rvx",
+      content: 'repeat(4) {\n  move(1)\n  turn("left")\n}',
+    },
+    {
+      id: "mission",
+      name: "mission.rvx",
+      content: 'let steps = 5\nmove(steps)\nturn("right")\nmove(2)',
+    },
+    {
+      id: "obstacle",
+      name: "obstacle.rvx",
+      content:
+        'placeObstacle(0, 2)\n\nmove(2)\n\nif (obstacle) {\n  turn("right")\n  move(1)\n} else {\n  move(1)\n}',
+    },
   ]);
   const [activeFileId, setActiveFileId] = useState<string>("obstacle");
 
@@ -80,20 +104,41 @@ const [isSimulatorOpen, setIsSimulatorOpen] = useState(true);
     }
   };
 
+  const generateRandomWorld = () => {
+    const newObstacles: string[] = [];
+    const numObstacles = Math.floor(Math.random() * 4) + 1;
+
+    while (newObstacles.length < numObstacles) {
+      const rx = Math.floor(Math.random() * 5);
+      const ry = Math.floor(Math.random() * 5);
+
+      if (rx === 0 && ry === 0) continue;
+
+      const obs = `${rx},${ry}`;
+      if (!newObstacles.includes(obs)) newObstacles.push(obs);
+    }
+
+    setObstacles(newObstacles);
+    setRoverState({ position: { x: 0, y: 0 }, direction: "N" });
+    setLogs(["[SISTEMA] Novo terreno gerado. Pronto para exploração."]);
+  };
+
   const handleRun = async () => {
     if (isRunning) return;
-    
+
     setIsRunning(true);
     setIsConsoleOpen(true);
-    setObstacles([]); 
-    setRoverState({ position: { x: 0, y: 0 }, direction: 'N' }); 
+    setRoverState({ position: { x: 0, y: 0 }, direction: "N" });
     setLogs(["[SISTEMA] Compilando código via motor proprietário..."]);
 
     try {
       const response = await fetch("/api/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: activeFile.content }),
+        body: JSON.stringify({
+          code: activeFile.content,
+          initialObstacles: obstacles,
+        }),
       });
 
       const data = await response.json();
@@ -104,23 +149,22 @@ const [isSimulatorOpen, setIsSimulatorOpen] = useState(true);
 
         if (data.history && data.history.length > 0) {
           let currentFrame = 0;
-          
+
           const playNextFrame = () => {
             setRoverState(data.history[currentFrame]);
             currentFrame++;
-            
+
             if (currentFrame < data.history.length) {
-              setTimeout(playNextFrame, 500); 
+              setTimeout(playNextFrame, 500);
             } else {
-              setIsRunning(false); 
+              setIsRunning(false);
             }
           };
-          
+
           playNextFrame();
         } else {
           setIsRunning(false);
         }
-
       } else {
         const errorList = data.errors || ["Erro desconhecido na compilação."];
         setLogs(errorList.map((err: string) => `[ERRO] ${err}`));
@@ -131,6 +175,7 @@ const [isSimulatorOpen, setIsSimulatorOpen] = useState(true);
       setIsRunning(false);
     }
   };
+
   const toggleConsole = () => {
     setIsConsoleOpen(!isConsoleOpen);
   };
@@ -142,7 +187,7 @@ const [isSimulatorOpen, setIsSimulatorOpen] = useState(true);
         onRun={handleRun}
         onToggleConsole={toggleConsole}
       />
-      
+
       <Workspace>
         <ActivityBar activeTab={activeTab} setActiveTab={setActiveTab} />
 
@@ -158,7 +203,6 @@ const [isSimulatorOpen, setIsSimulatorOpen] = useState(true);
 
         <MainContent>
           <EditorSplit>
-            
             <LeftPane>
               <Editor
                 fileName={activeFile?.name || ""}
@@ -175,10 +219,13 @@ const [isSimulatorOpen, setIsSimulatorOpen] = useState(true);
 
             {isSimulatorOpen && (
               <RightPane>
-                <Simulator roverState={roverState} obstacles={obstacles} />
+                <Simulator
+                  roverState={roverState}
+                  obstacles={obstacles}
+                  onRandomizeBoard={generateRandomWorld}
+                />
               </RightPane>
-)}
-
+            )}
           </EditorSplit>
         </MainContent>
       </Workspace>
