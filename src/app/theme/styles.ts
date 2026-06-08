@@ -1,6 +1,6 @@
 "use client";
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 export const IDEContainer = styled.div`
   display: flex;
@@ -39,12 +39,32 @@ export const ActivityButton = styled.button<{ $active?: boolean }>`
   }
 `;
 
-export const Sidebar = styled.aside`
-  width: 250px;
+export const Sidebar = styled.aside<{ $width: number; $open: boolean }>`
+  width: ${({ $width, $open }) => ($open ? `${$width}px` : '0')};
+  min-width: 0;
+  overflow: hidden;
+  flex-shrink: 0;
   background-color: #252526;
-  border-right: 1px solid #2b2b2b;
+  border-right: ${({ $open }) => ($open ? '1px solid #2b2b2b' : 'none')};
   display: flex;
   flex-direction: column;
+  transition: width 0.15s ease;
+`;
+
+export const ResizeHandle = styled.div`
+  width: 4px;
+  flex-shrink: 0;
+  cursor: col-resize;
+  background: transparent;
+  position: relative;
+  z-index: 5;
+
+  &:hover {
+    background: #007acc55;
+  }
+  &:active {
+    background: #007acc;
+  }
 `;
 
 export const SidebarHeader = styled.div`
@@ -189,7 +209,91 @@ export const SearchInput = styled.input`
   &:focus {
     border-color: #007acc;
     background-color: #1e1e1e;
+    text-align: left;
   }
+`;
+
+export const SidebarSearchInput = styled.input`
+  width: calc(100% - 24px);
+  margin: 8px 12px;
+  height: 26px;
+  background-color: #2b2b2b;
+  border: 1px solid #3c3c3c;
+  border-radius: 4px;
+  color: #cccccc;
+  padding: 0 8px;
+  font-size: 12px;
+  outline: none;
+  font-family: 'Consolas', 'Courier New', monospace;
+
+  &:focus {
+    border-color: #007acc;
+  }
+`;
+
+export const SearchResultGroup = styled.div`
+  margin-bottom: 4px;
+`;
+
+export const SearchResultFileName = styled.div`
+  padding: 4px 12px;
+  font-size: 12px;
+  color: #cccccc;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  &:hover {
+    background-color: #2a2d2e;
+  }
+`;
+
+export const SearchResultLine = styled.div`
+  padding: 2px 12px;
+  padding-left: 24px;
+  font-size: 12px;
+  color: #858585;
+  cursor: pointer;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: 'Consolas', 'Courier New', monospace;
+  white-space: nowrap;
+  overflow: hidden;
+
+  &:hover {
+    background-color: #2a2d2e;
+    color: #cccccc;
+  }
+`;
+
+export const SearchLineNumber = styled.span`
+  color: #555;
+  min-width: 20px;
+  text-align: right;
+  flex-shrink: 0;
+  user-select: none;
+`;
+
+export const SearchMatchText = styled.span`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+`;
+
+export const SearchHighlight = styled.mark`
+  background-color: #613315;
+  color: #f0a070;
+  border-radius: 2px;
+`;
+
+export const SearchEmpty = styled.div`
+  padding: 20px 12px;
+  font-size: 12px;
+  color: #555;
+  text-align: center;
 `;
 
 export const EditorContainer = styled.div`
@@ -277,9 +381,31 @@ export const IconButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  
+
   &:hover {
     color: #ffffff;
+  }
+`;
+
+export const NavIconButton = styled.button`
+  background: none;
+  border: none;
+  color: #858585;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 4px;
+
+  &:hover:not(:disabled) {
+    color: #ffffff;
+    background-color: #2b2b2b;
+  }
+
+  &:disabled {
+    color: #3c3c3c;
+    cursor: default;
   }
 `;
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import {
   IDEContainer,
   Workspace,
@@ -8,6 +8,7 @@ import {
   EditorSplit,
   LeftPane,
   RightPane,
+  ResizeHandle,
 } from "./theme/styles";
 import { Header } from "./components/Header";
 import { ActivityBar } from "./components/ActivityBar";
@@ -24,6 +25,9 @@ interface File {
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("explorer");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [fileHistory, setFileHistory] = useState<string[]>(["obstacle"]);
+  const [historyIndex, setHistoryIndex] = useState(0);
   const [logs, setLogs] = useState<string[]>([
     "[SISTEMA] Motor customizado iniciado. Ocioso.",
   ]);
@@ -176,8 +180,77 @@ export default function Home() {
     }
   };
 
-  const toggleConsole = () => {
-    setIsConsoleOpen(!isConsoleOpen);
+  const SIDEBAR_MIN = 150;
+  const SIDEBAR_MAX = 500;
+  const SIDEBAR_DEFAULT = 250;
+
+  const [sidebarWidth, setSidebarWidth] = useState(SIDEBAR_DEFAULT);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const sidebarWidthRef = useRef(SIDEBAR_DEFAULT);
+
+  const handleResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = sidebarWidthRef.current;
+
+    const onMouseMove = (ev: MouseEvent) => {
+      const newWidth = startWidth + (ev.clientX - startX);
+      if (newWidth < SIDEBAR_MIN) {
+        setIsSidebarOpen(false);
+      } else {
+        setIsSidebarOpen(true);
+        const clamped = Math.min(newWidth, SIDEBAR_MAX);
+        setSidebarWidth(clamped);
+        sidebarWidthRef.current = clamped;
+      }
+    };
+
+    const onMouseUp = () => {
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+  }, []);
+
+  const handleActivityBarTab = (tab: string) => {
+    if (tab === activeTab && isSidebarOpen) {
+      setIsSidebarOpen(false);
+    } else {
+      setIsSidebarOpen(true);
+      setActiveTab(tab);
+    }
+  };
+
+  const toggleConsole = () => setIsConsoleOpen((v) => !v);
+  const toggleSimulator = () => setIsSimulatorOpen((v) => !v);
+
+  const navigateToFile = (id: string) => {
+    const newHistory = [...fileHistory.slice(0, historyIndex + 1), id];
+    setFileHistory(newHistory);
+    setHistoryIndex(newHistory.length - 1);
+    setActiveFileId(id);
+  };
+
+  const handleBack = () => {
+    if (historyIndex > 0) {
+      const newIndex = historyIndex - 1;
+      setHistoryIndex(newIndex);
+      setActiveFileId(fileHistory[newIndex]);
+    }
+  };
+
+  const handleForward = () => {
+    if (historyIndex < fileHistory.length - 1) {
+      const newIndex = historyIndex + 1;
+      setHistoryIndex(newIndex);
+      setActiveFileId(fileHistory[newIndex]);
+    }
   };
 
   return (
@@ -186,20 +259,36 @@ export default function Home() {
         setActiveTab={setActiveTab}
         onRun={handleRun}
         onToggleConsole={toggleConsole}
+        onToggleSimulator={toggleSimulator}
+        searchQuery={searchQuery}
+        onSearch={setSearchQuery}
+        onBack={handleBack}
+        onForward={handleForward}
+        canGoBack={historyIndex > 0}
+        canGoForward={historyIndex < fileHistory.length - 1}
       />
 
       <Workspace>
-        <ActivityBar activeTab={activeTab} setActiveTab={setActiveTab} />
+        <ActivityBar activeTab={activeTab} setActiveTab={handleActivityBarTab} />
 
         <Sidebar
+          $width={sidebarWidth}
+          $open={isSidebarOpen}
           activeTab={activeTab}
           files={files}
           activeFileId={activeFileId}
-          setActiveFileId={setActiveFileId}
+          setActiveFileId={(id) => {
+            navigateToFile(id);
+            setActiveTab("explorer");
+          }}
           onNewFile={handleNewFile}
           onRenameFile={handleRenameFile}
           onDeleteFile={handleDeleteFile}
+          searchQuery={searchQuery}
+          onSearch={setSearchQuery}
         />
+
+        <ResizeHandle onMouseDown={handleResizeStart} />
 
         <MainContent>
           <EditorSplit>

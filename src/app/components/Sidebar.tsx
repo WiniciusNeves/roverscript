@@ -1,13 +1,21 @@
-import { useState, useEffect, KeyboardEvent } from "react";
-import { 
-  Sidebar as Container, 
-  SidebarAction, 
-  IconButton, 
-  FileList, 
+import { useState, useEffect, KeyboardEvent, useRef } from "react";
+import {
+  Sidebar as Container,
+  SidebarAction,
+  IconButton,
+  FileList,
   FileItem,
   ContextMenu,
   ContextMenuItem,
-  RenameInput
+  RenameInput,
+  SidebarSearchInput,
+  SearchResultGroup,
+  SearchResultFileName,
+  SearchResultLine,
+  SearchLineNumber,
+  SearchMatchText,
+  SearchHighlight,
+  SearchEmpty,
 } from "../theme/styles";
 
 interface File {
@@ -16,7 +24,21 @@ interface File {
   content: string;
 }
 
+interface LineMatch {
+  lineNumber: number;
+  text: string;
+  matchStart: number;
+  matchEnd: number;
+}
+
+interface SearchResult {
+  file: File;
+  lineMatches: LineMatch[];
+}
+
 interface Props {
+  $width: number;
+  $open: boolean;
   activeTab: string;
   files: File[];
   activeFileId: string;
@@ -24,20 +46,27 @@ interface Props {
   onNewFile: () => void;
   onRenameFile: (id: string, newName: string) => void;
   onDeleteFile: (id: string) => void;
+  searchQuery: string;
+  onSearch: (query: string) => void;
 }
 
-export function Sidebar({ 
-  activeTab, 
-  files, 
-  activeFileId, 
-  setActiveFileId, 
+export function Sidebar({
+  $width,
+  $open,
+  activeTab,
+  files,
+  activeFileId,
+  setActiveFileId,
   onNewFile,
   onRenameFile,
-  onDeleteFile
+  onDeleteFile,
+  searchQuery,
+  onSearch,
 }: Props) {
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; fileId: string } | null>(null);
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
+  const sidebarInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const handleClickOutside = () => setContextMenu(null);
@@ -70,18 +99,108 @@ export function Sidebar({
     setRenamingId(null);
   };
 
+  useEffect(() => {
+    if (activeTab === "search") {
+      sidebarInputRef.current?.focus();
+    }
+  }, [activeTab]);
+
+  const searchResults: SearchResult[] = (() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return [];
+
+    return files
+      .map((file) => {
+        const lines = file.content.split("\n");
+        const lineMatches: LineMatch[] = [];
+
+        lines.forEach((text, i) => {
+          const idx = text.toLowerCase().indexOf(q);
+          if (idx !== -1) {
+            lineMatches.push({
+              lineNumber: i + 1,
+              text,
+              matchStart: idx,
+              matchEnd: idx + q.length,
+            });
+          }
+        });
+
+        const nameMatches = file.name.toLowerCase().includes(q);
+        if (lineMatches.length === 0 && !nameMatches) return null;
+
+        return { file, lineMatches };
+      })
+      .filter(Boolean) as SearchResult[];
+  })();
+
+  if (activeTab === "search") {
+    const totalMatches = searchResults.reduce((acc, r) => acc + Math.max(r.lineMatches.length, 1), 0);
+
+    return (
+      <Container $width={$width} $open={$open}>
+        <SidebarAction>
+          <span>PESQUISAR</span>
+          {searchQuery && <span style={{ color: '#555', fontSize: 11 }}>{totalMatches} resultado{totalMatches !== 1 ? "s" : ""}</span>}
+        </SidebarAction>
+
+        <SidebarSearchInput
+          ref={sidebarInputRef}
+          placeholder="Pesquisar..."
+          value={searchQuery}
+          onChange={(e) => onSearch(e.target.value)}
+        />
+
+        <FileList>
+          {!searchQuery && (
+            <SearchEmpty>Digite para pesquisar em todos os arquivos.</SearchEmpty>
+          )}
+          {searchQuery && searchResults.length === 0 && (
+            <SearchEmpty>Nenhum resultado encontrado para "{searchQuery}".</SearchEmpty>
+          )}
+          {searchResults.map(({ file, lineMatches }) => (
+            <SearchResultGroup key={file.id}>
+              <SearchResultFileName onClick={() => setActiveFileId(file.id)}>
+                <span style={{ color: '#519aba' }}>📄</span>
+                <span>{file.name}</span>
+                <span style={{ color: '#555', marginLeft: 'auto', fontSize: 11 }}>
+                  {lineMatches.length > 0 ? `${lineMatches.length}` : ""}
+                </span>
+              </SearchResultFileName>
+
+              {lineMatches.map((match, i) => (
+                <SearchResultLine
+                  key={i}
+                  onClick={() => setActiveFileId(file.id)}
+                  title={match.text.trim()}
+                >
+                  <SearchLineNumber>{match.lineNumber}</SearchLineNumber>
+                  <SearchMatchText>
+                    {match.text.slice(0, match.matchStart)}
+                    <SearchHighlight>{match.text.slice(match.matchStart, match.matchEnd)}</SearchHighlight>
+                    {match.text.slice(match.matchEnd)}
+                  </SearchMatchText>
+                </SearchResultLine>
+              ))}
+            </SearchResultGroup>
+          ))}
+        </FileList>
+      </Container>
+    );
+  }
+
   if (activeTab !== "explorer" && activeTab !== "file") {
     return (
-      <Container>
+      <Container $width={$width} $open={$open}>
         <SidebarAction>
-          <span>{activeTab === "search" ? "Pesquisar" : "Documentação"}</span>
+          <span>Documentação</span>
         </SidebarAction>
       </Container>
     );
   }
 
   return (
-    <Container>
+    <Container $width={$width} $open={$open}>
       <SidebarAction>
         <span>EXPLORER: PROJETO</span>
         <IconButton onClick={onNewFile} title="Novo Arquivo">📄+</IconButton>
