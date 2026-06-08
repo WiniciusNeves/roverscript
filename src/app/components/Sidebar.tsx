@@ -16,6 +16,8 @@ import {
   SearchMatchText,
   SearchHighlight,
   SearchEmpty,
+  FolderRow,
+  DocFileItem,
 } from "../theme/styles";
 
 interface File {
@@ -189,15 +191,45 @@ export function Sidebar({
     );
   }
 
+  if (activeTab === "docs") {
+    const docFiles = files.filter(f => f.name.endsWith(".md"));
+    return (
+      <Container $width={$width} $open={$open}>
+        <SidebarAction>
+          <span>DOCUMENTAÇÃO</span>
+        </SidebarAction>
+        <FileList>
+          <FolderRow>
+            <span style={{ color: '#e8c97a' }}>▾</span>
+            <span style={{ color: '#e8c97a' }}>📁</span>
+            docs
+          </FolderRow>
+          {docFiles.map(file => (
+            <DocFileItem
+              key={file.id}
+              $active={activeFileId === file.id}
+              onClick={() => setActiveFileId(file.id)}
+            >
+              <span style={{ color: '#c8a4f8' }}>📖</span>
+              {file.name}
+            </DocFileItem>
+          ))}
+        </FileList>
+      </Container>
+    );
+  }
+
   if (activeTab !== "explorer" && activeTab !== "file") {
     return (
       <Container $width={$width} $open={$open}>
         <SidebarAction>
-          <span>Documentação</span>
+          <span>{activeTab.toUpperCase()}</span>
         </SidebarAction>
       </Container>
     );
   }
+
+  const rvxFiles = files.filter(f => !f.name.endsWith(".md"));
 
   return (
     <Container $width={$width} $open={$open}>
@@ -207,17 +239,17 @@ export function Sidebar({
       </SidebarAction>
 
       <FileList>
-        {files.map(file => (
-          <FileItem 
-            key={file.id} 
+        {rvxFiles.map(file => (
+          <FileItem
+            key={file.id}
             $active={activeFileId === file.id}
             onClick={() => setActiveFileId(file.id)}
             onContextMenu={(e) => handleRightClick(e, file.id)}
           >
             <span style={{ color: '#519aba' }}>📄</span>
-            
+
             {renamingId === file.id ? (
-              <RenameInput 
+              <RenameInput
                 autoFocus
                 value={renameValue}
                 onChange={(e) => setRenameValue(e.target.value)}

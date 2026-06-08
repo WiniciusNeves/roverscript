@@ -105,6 +105,23 @@ export const CustomTextArea = styled.textarea`
   overflow-wrap: normal;
   overflow-x: auto;
   line-height: 1.5;
+  scrollbar-width: thin;
+  scrollbar-color: #3c3c3c transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #3c3c3c;
+    border-radius: 3px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
 `;
 
 export const ConsolePanel = styled.footer`
@@ -131,6 +148,22 @@ export const ConsoleOutput = styled.div`
   overflow-y: auto;
   font-size: 13px;
   color: #4af626;
+  scrollbar-width: thin;
+  scrollbar-color: #3c3c3c transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #3c3c3c;
+    border-radius: 3px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
 `;
 
 
@@ -294,6 +327,33 @@ export const SearchEmpty = styled.div`
   font-size: 12px;
   color: #555;
   text-align: center;
+`;
+
+export const FolderRow = styled.div`
+  padding: 4px 12px;
+  font-size: 12px;
+  color: #cccccc;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: default;
+  user-select: none;
+  font-weight: 600;
+`;
+
+export const DocFileItem = styled.div<{ $active?: boolean }>`
+  padding: 4px 12px 4px 32px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: ${({ $active }) => ($active ? '#37373d' : 'transparent')};
+  color: ${({ $active }) => ($active ? '#ffffff' : '#cccccc')};
+
+  &:hover {
+    background-color: #2a2d2e;
+  }
 `;
 
 export const EditorContainer = styled.div`

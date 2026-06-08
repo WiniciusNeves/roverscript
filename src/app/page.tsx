@@ -11,6 +11,7 @@ import {
   ResizeHandle,
 } from "./theme/styles";
 import { Header } from "./components/Header";
+import { LANGUAGE_DOC, ARCHITECTURE_DOC } from "./docs/content";
 import { ActivityBar } from "./components/ActivityBar";
 import { Sidebar } from "./components/Sidebar";
 import { Editor } from "./components/Editor";
@@ -66,6 +67,16 @@ export default function Home() {
       name: "obstacle.rvx",
       content:
         'placeObstacle(0, 2)\n\nmove(2)\n\nif (obstacle) {\n  turn("right")\n  move(1)\n} else {\n  move(1)\n}',
+    },
+    {
+      id: "doc-language",
+      name: "language.md",
+      content: LANGUAGE_DOC,
+    },
+    {
+      id: "doc-architecture",
+      name: "architecture.md",
+      content: ARCHITECTURE_DOC,
     },
   ]);
   const [activeFileId, setActiveFileId] = useState<string>("obstacle");
@@ -279,7 +290,7 @@ export default function Home() {
           activeFileId={activeFileId}
           setActiveFileId={(id) => {
             navigateToFile(id);
-            setActiveTab("explorer");
+            if (activeTab !== "docs") setActiveTab("explorer");
           }}
           onNewFile={handleNewFile}
           onRenameFile={handleRenameFile}
@@ -288,7 +299,9 @@ export default function Home() {
           onSearch={setSearchQuery}
         />
 
-        <ResizeHandle onMouseDown={handleResizeStart} />
+        {activeTab !== "docs" && (
+          <ResizeHandle onMouseDown={handleResizeStart} />
+        )}
 
         <MainContent>
           <EditorSplit>
@@ -301,12 +314,12 @@ export default function Home() {
                 isRunning={isRunning}
               />
 
-              {isConsoleOpen && (
+              {isConsoleOpen && activeTab !== "docs" && (
                 <Console logs={logs} isRunning={isRunning} onRun={handleRun} />
               )}
             </LeftPane>
 
-            {isSimulatorOpen && (
+            {isSimulatorOpen && activeTab !== "docs" && (
               <RightPane>
                 <Simulator
                   roverState={roverState}
