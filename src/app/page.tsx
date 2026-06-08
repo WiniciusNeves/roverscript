@@ -151,11 +151,11 @@ export default function Home() {
     setLogs(["[SISTEMA] Novo terreno gerado. Pronto para exploração."]);
   };
 
-  const handleRun = async () => {
-    if (isRunning) return;
-
+  const runCode = async () => {
+    const runId = ++runIdRef.current;
     setIsRunning(true);
     setIsConsoleOpen(true);
+    setObstacles([]);
     setRoverState({ position: { x: 0, y: 0 }, direction: "N" });
     setLogs(["[SISTEMA] Compilando código via motor proprietário..."]);
 
@@ -165,11 +165,13 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           code: activeFile.content,
-          initialObstacles: obstacles,
+          initialObstacles: [],
         }),
       });
 
       const data = await response.json();
+
+      if (runIdRef.current !== runId) return;
 
       if (data.success) {
         setLogs(data.logs);
@@ -179,13 +181,14 @@ export default function Home() {
           let currentFrame = 0;
 
           const playNextFrame = () => {
+            if (runIdRef.current !== runId) return;
             setRoverState(data.history[currentFrame]);
             currentFrame++;
 
             if (currentFrame < data.history.length) {
               setTimeout(playNextFrame, 500);
             } else {
-              setIsRunning(false);
+              if (runIdRef.current === runId) setIsRunning(false);
             }
           };
 
@@ -199,9 +202,16 @@ export default function Home() {
         setIsRunning(false);
       }
     } catch (error) {
-      setLogs(["[ERRO FATAL] Falha de comunicação."]);
-      setIsRunning(false);
+      if (runIdRef.current === runId) {
+        setLogs(["[ERRO FATAL] Falha de comunicação."]);
+        setIsRunning(false);
+      }
     }
+  };
+
+  const handleRun = () => {
+    if (isRunning) return;
+    runCode();
   };
 
   const SIDEBAR_MIN = 150;
@@ -212,6 +222,7 @@ export default function Home() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const sidebarWidthRef = useRef(SIDEBAR_DEFAULT);
   const lastRvxFileIdRef = useRef("obstacle");
+  const runIdRef = useRef(0);
 
   const handleResizeStart = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -256,6 +267,15 @@ export default function Home() {
         }
       }
     }
+  };
+
+  const handleStop = () => {
+    runIdRef.current++;
+    setIsRunning(false);
+  };
+
+  const handleRestart = () => {
+    runCode();
   };
 
   const toggleConsole = () => setIsConsoleOpen((v) => !v);
@@ -351,6 +371,8 @@ export default function Home() {
                 code={activeFile?.content || ""}
                 setCode={handleCodeChange}
                 onRun={handleRun}
+                onStop={handleStop}
+                onRestart={handleRestart}
                 isRunning={isRunning}
               />
 
