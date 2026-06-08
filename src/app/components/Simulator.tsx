@@ -33,7 +33,11 @@ export function Simulator({ roverState, obstacles, onRandomizeBoard }: Props) {
 
       cells.push(
         <GridCell key={`${x}-${y}`}>
-          {isObstacleHere && <div>🪨</div>}
+          {isObstacleHere && (
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="#555" stroke="#3c3c3c" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="12 2 20 8 20 18 12 22 4 18 4 8 12 2"/>
+            </svg>
+          )}
           {!isObstacleHere && (
             <CellCoordinate>{x},{y}</CellCoordinate>
           )}
@@ -70,12 +74,14 @@ export function Simulator({ roverState, obstacles, onRandomizeBoard }: Props) {
         <GridBoard>
           {cells}
           
-          <RoverEntity 
-            $x={roverState.position.x} 
-            $y={roverState.position.y} 
+          <RoverEntity
+            $x={roverState.position.x}
+            $y={roverState.position.y}
             $rotation={rotation}
           >
-            🚀
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4af626" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="12 2 19 21 12 17 5 21 12 2" fill="#4af62644"/>
+            </svg>
           </RoverEntity>
           
         </GridBoard>

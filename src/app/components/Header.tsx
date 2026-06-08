@@ -14,8 +14,7 @@ interface Props {
   onRun: () => void;
   onToggleConsole: () => void;
   onToggleSimulator: () => void;
-  searchQuery: string;
-  onSearch: (query: string) => void;
+  onOpenQuickOpen: () => void;
   onBack: () => void;
   onForward: () => void;
   canGoBack: boolean;
@@ -27,8 +26,7 @@ export function Header({
   onRun,
   onToggleConsole,
   onToggleSimulator,
-  searchQuery,
-  onSearch,
+  onOpenQuickOpen,
   onBack,
   onForward,
   canGoBack,
@@ -65,13 +63,10 @@ export function Header({
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
           <SearchInput
-            placeholder="roverX / Pesquisar arquivos ou comandos..."
-            value={searchQuery}
-            onChange={(e) => {
-              onSearch(e.target.value);
-              setActiveTab("search");
-            }}
-            onFocus={() => setActiveTab("search")}
+            placeholder="roverX / Buscar arquivo... (Ctrl+P)"
+            readOnly
+            onClick={onOpenQuickOpen}
+            style={{ cursor: 'pointer' }}
           />
         </div>
       </TopBarSection>

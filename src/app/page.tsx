@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import {
   IDEContainer,
   Workspace,
@@ -17,6 +17,7 @@ import { Sidebar } from "./components/Sidebar";
 import { Editor } from "./components/Editor";
 import { Console } from "./components/Console";
 import { Simulator } from "./components/Simulator";
+import { QuickOpen } from "./components/QuickOpen";
 
 interface File {
   id: string;
@@ -27,6 +28,18 @@ interface File {
 export default function Home() {
   const [activeTab, setActiveTab] = useState("explorer");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isQuickOpenOpen, setIsQuickOpenOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "p") {
+        e.preventDefault();
+        setIsQuickOpenOpen(true);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
   const [fileHistory, setFileHistory] = useState<string[]>(["obstacle"]);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [logs, setLogs] = useState<string[]>([
@@ -282,13 +295,29 @@ export default function Home() {
         onRun={handleRun}
         onToggleConsole={toggleConsole}
         onToggleSimulator={toggleSimulator}
-        searchQuery={searchQuery}
-        onSearch={setSearchQuery}
+        onOpenQuickOpen={() => setIsQuickOpenOpen(true)}
         onBack={handleBack}
         onForward={handleForward}
         canGoBack={historyIndex > 0}
         canGoForward={historyIndex < fileHistory.length - 1}
       />
+
+      {isQuickOpenOpen && (
+        <QuickOpen
+          files={files}
+          onSelect={(id) => {
+            navigateToFile(id);
+            setIsQuickOpenOpen(false);
+            const file = files.find(f => f.id === id);
+            if (file?.name.endsWith(".md")) {
+              setActiveTab("docs");
+            } else {
+              setActiveTab("explorer");
+            }
+          }}
+          onClose={() => setIsQuickOpenOpen(false)}
+        />
+      )}
 
       <Workspace>
         <ActivityBar activeTab={activeTab} setActiveTab={handleActivityBarTab} />

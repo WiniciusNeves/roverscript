@@ -329,6 +329,78 @@ export const SearchEmpty = styled.div`
   text-align: center;
 `;
 
+export const QuickOpenOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+`;
+
+export const QuickOpenModal = styled.div`
+  position: fixed;
+  top: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 520px;
+  max-width: 90vw;
+  background: #252526;
+  border: 1px solid #3c3c3c;
+  border-radius: 6px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  overflow: hidden;
+`;
+
+export const QuickOpenInput = styled.input`
+  width: 100%;
+  height: 38px;
+  background: #2b2b2b;
+  border: none;
+  border-bottom: 1px solid #3c3c3c;
+  color: #cccccc;
+  font-size: 13px;
+  padding: 0 12px 0 38px;
+  outline: none;
+  font-family: 'Consolas', 'Courier New', monospace;
+  box-sizing: border-box;
+
+  &::placeholder {
+    color: #555;
+  }
+`;
+
+export const QuickOpenList = styled.div`
+  max-height: 380px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #3c3c3c transparent;
+
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: #3c3c3c; border-radius: 2px; }
+`;
+
+export const QuickOpenItem = styled.div<{ $active?: boolean }>`
+  padding: 7px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  background: ${({ $active }) => ($active ? '#094771' : 'transparent')};
+  color: ${({ $active }) => ($active ? '#ffffff' : '#cccccc')};
+
+  &:hover {
+    background: ${({ $active }) => ($active ? '#094771' : '#2a2d2e')};
+  }
+`;
+
+export const QuickOpenEmpty = styled.div`
+  padding: 16px;
+  color: #555;
+  font-size: 12px;
+  text-align: center;
+`;
+
 export const FolderRow = styled.div`
   padding: 4px 12px;
   font-size: 12px;
