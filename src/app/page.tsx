@@ -198,6 +198,7 @@ export default function Home() {
   const [sidebarWidth, setSidebarWidth] = useState(SIDEBAR_DEFAULT);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const sidebarWidthRef = useRef(SIDEBAR_DEFAULT);
+  const lastRvxFileIdRef = useRef("obstacle");
 
   const handleResizeStart = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -235,6 +236,12 @@ export default function Home() {
     } else {
       setIsSidebarOpen(true);
       setActiveTab(tab);
+      if (activeTab === "docs" && tab !== "docs") {
+        const current = files.find(f => f.id === activeFileId);
+        if (current?.name.endsWith(".md")) {
+          setActiveFileId(lastRvxFileIdRef.current);
+        }
+      }
     }
   };
 
@@ -242,6 +249,10 @@ export default function Home() {
   const toggleSimulator = () => setIsSimulatorOpen((v) => !v);
 
   const navigateToFile = (id: string) => {
+    const file = files.find(f => f.id === id);
+    if (file && !file.name.endsWith(".md")) {
+      lastRvxFileIdRef.current = id;
+    }
     const newHistory = [...fileHistory.slice(0, historyIndex + 1), id];
     setFileHistory(newHistory);
     setHistoryIndex(newHistory.length - 1);

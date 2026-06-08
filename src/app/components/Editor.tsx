@@ -52,21 +52,43 @@ export function Editor({ fileName, code, setCode, onRun, isRunning }: Props) {
   return (
     <EditorContainer>
       <EditorHeader>
-        <span style={{ color: '#519aba', marginRight: '10px' }}>📄</span>
+        <span style={{ color: '#519aba', marginRight: '8px', display: 'flex', alignItems: 'center' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+        </span>
         {fileName}
       </EditorHeader>
 
-      <FloatingToolbar>
+      {!fileName.endsWith('.md') && <FloatingToolbar>
         <FloatingButton $primary onClick={onRun} disabled={isRunning}>
-          {isRunning ? "⏳" : "▶"} {isRunning ? "Rodando..." : "Run"}
+          {isRunning ? (
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+          ) : (
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+          )}
+          {isRunning ? "Rodando..." : "Run"}
         </FloatingButton>
         <FloatingButton disabled={!isRunning}>
-          ⏹ Stop
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+          </svg>
+          Stop
         </FloatingButton>
         <FloatingButton>
-          ↻ Restart
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="1 4 1 10 7 10"/>
+            <path d="M3.51 15a9 9 0 1 0 .49-3.72"/>
+          </svg>
+          Restart
         </FloatingButton>
-      </FloatingToolbar>
+      </FloatingToolbar>}
 
       <EditorLayout>
         <LineNumbersColumn ref={linesRef}>

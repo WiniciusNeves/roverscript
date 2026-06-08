@@ -45,13 +45,25 @@ export function Simulator({ roverState, obstacles, onRandomizeBoard }: Props) {
   return (
     <>
       <SimulatorHeader style={{ justifyContent: 'space-between' }}>
-        <span>Simulador Cartesiano 2D</span>
-        <button 
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2"/>
+            <line x1="8" y1="21" x2="16" y2="21"/>
+            <line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
+          Simulador Cartesiano 2D
+        </span>
+        <button
           onClick={onRandomizeBoard}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#858585', display: 'flex', alignItems: 'center' }}
           title="Gerar Terreno Aleatório"
         >
-          🎲
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="16 3 21 3 21 8"/>
+            <line x1="4" y1="20" x2="21" y2="3"/>
+            <polyline points="21 16 21 21 16 21"/>
+            <line x1="15" y1="15" x2="21" y2="21"/>
+          </svg>
         </button>
       </SimulatorHeader>
       <SimulatorBody>

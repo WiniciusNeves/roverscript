@@ -163,7 +163,10 @@ export function Sidebar({
           {searchResults.map(({ file, lineMatches }) => (
             <SearchResultGroup key={file.id}>
               <SearchResultFileName onClick={() => setActiveFileId(file.id)}>
-                <span style={{ color: '#519aba' }}>📄</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#519aba" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                </svg>
                 <span>{file.name}</span>
                 <span style={{ color: '#555', marginLeft: 'auto', fontSize: 11 }}>
                   {lineMatches.length > 0 ? `${lineMatches.length}` : ""}
@@ -200,8 +203,12 @@ export function Sidebar({
         </SidebarAction>
         <FileList>
           <FolderRow>
-            <span style={{ color: '#e8c97a' }}>▾</span>
-            <span style={{ color: '#e8c97a' }}>📁</span>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#e8c97a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e8c97a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+            </svg>
             docs
           </FolderRow>
           {docFiles.map(file => (
@@ -210,7 +217,10 @@ export function Sidebar({
               $active={activeFileId === file.id}
               onClick={() => setActiveFileId(file.id)}
             >
-              <span style={{ color: '#c8a4f8' }}>📖</span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c8a4f8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+              </svg>
               {file.name}
             </DocFileItem>
           ))}
@@ -235,7 +245,14 @@ export function Sidebar({
     <Container $width={$width} $open={$open}>
       <SidebarAction>
         <span>EXPLORER: PROJETO</span>
-        <IconButton onClick={onNewFile} title="Novo Arquivo">📄+</IconButton>
+        <IconButton onClick={onNewFile} title="Novo Arquivo">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="12" y1="18" x2="12" y2="12"/>
+            <line x1="9" y1="15" x2="15" y2="15"/>
+          </svg>
+        </IconButton>
       </SidebarAction>
 
       <FileList>
@@ -246,7 +263,10 @@ export function Sidebar({
             onClick={() => setActiveFileId(file.id)}
             onContextMenu={(e) => handleRightClick(e, file.id)}
           >
-            <span style={{ color: '#519aba' }}>📄</span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#519aba" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
 
             {renamingId === file.id ? (
               <RenameInput
