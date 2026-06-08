@@ -104,13 +104,9 @@ export default function Home() {
     );
   };
 
-  const handleNewFile = () => {
+  const handleNewFile = (name: string) => {
     const newId = Date.now().toString();
-    const newFile: File = {
-      id: newId,
-      name: `novo_${files.length + 1}.rvx`,
-      content: "",
-    };
+    const newFile: File = { id: newId, name, content: "" };
     setFiles([...files, newFile]);
     setActiveFileId(newId);
   };

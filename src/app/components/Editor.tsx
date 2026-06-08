@@ -63,7 +63,7 @@ export function Editor({ fileName, code, setCode, onRun, onStop, onRestart, isRu
         {fileName}
       </EditorHeader>
 
-      {!fileName.endsWith('.md') && <FloatingToolbar>
+      {fileName.endsWith('.rvx') && <FloatingToolbar>
         <FloatingButton $primary onClick={onRun} disabled={isRunning}>
           {isRunning ? (
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

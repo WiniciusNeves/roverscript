@@ -45,7 +45,7 @@ interface Props {
   files: File[];
   activeFileId: string;
   setActiveFileId: (id: string) => void;
-  onNewFile: () => void;
+  onNewFile: (name: string) => void;
   onRenameFile: (id: string, newName: string) => void;
   onDeleteFile: (id: string) => void;
   searchQuery: string;
@@ -68,6 +68,9 @@ export function Sidebar({
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; fileId: string } | null>(null);
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
+  const [isCreatingNew, setIsCreatingNew] = useState(false);
+  const [newFileName, setNewFileName] = useState("");
+  const newFileInputRef = useRef<HTMLInputElement>(null);
   const sidebarInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -95,10 +98,46 @@ export function Sidebar({
   };
 
   const commitRename = (fileId: string) => {
-    if (renameValue.trim()) {
-      onRenameFile(fileId, renameValue.trim());
+    const trimmed = renameValue.trim();
+    if (trimmed && !renameError) {
+      onRenameFile(fileId, trimmed);
     }
     setRenamingId(null);
+  };
+
+  const handleCreateClick = () => {
+    setIsCreatingNew(true);
+    setNewFileName("");
+    setTimeout(() => newFileInputRef.current?.focus(), 0);
+  };
+
+  const newFileError = newFileName.includes(" ")
+    ? "O nome não pode conter espaços"
+    : newFileName.trim() && !newFileName.trim().match(/^[^\\/:<>"|?*]+$/)
+    ? "Caractere inválido no nome"
+    : "";
+
+  const newFileWarning =
+    !newFileError && newFileName.trim() && !newFileName.trim().endsWith(".rvx")
+      ? "Arquivos sem extensão .rvx não podem ser executados"
+      : "";
+
+  const renameError = renameValue.includes(" ")
+    ? "O nome não pode conter espaços"
+    : "";
+
+  const commitNewFile = () => {
+    const name = newFileName.trim();
+    if (name && !newFileError) {
+      onNewFile(name);
+    }
+    setIsCreatingNew(false);
+    setNewFileName("");
+  };
+
+  const handleNewFileKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") { if (!newFileError) commitNewFile(); }
+    else if (e.key === "Escape") { setIsCreatingNew(false); setNewFileName(""); }
   };
 
   useEffect(() => {
@@ -245,7 +284,7 @@ export function Sidebar({
     <Container $width={$width} $open={$open}>
       <SidebarAction>
         <span>EXPLORER: PROJETO</span>
-        <IconButton onClick={onNewFile} title="Novo Arquivo">
+        <IconButton onClick={handleCreateClick} title="Novo Arquivo">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
             <polyline points="14 2 14 8 20 8"/>
@@ -256,6 +295,36 @@ export function Sidebar({
       </SidebarAction>
 
       <FileList>
+        {isCreatingNew && (
+          <div>
+            <FileItem $active={false}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#519aba" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+              <RenameInput
+                ref={newFileInputRef}
+                autoFocus
+                value={newFileName}
+                onChange={(e) => setNewFileName(e.target.value)}
+                onKeyDown={handleNewFileKeyDown}
+                onBlur={commitNewFile}
+                placeholder="nome.rvx"
+                style={newFileError ? { borderColor: '#f44747', outline: '1px solid #f44747' } : {}}
+              />
+            </FileItem>
+            {newFileError && (
+              <div style={{ color: '#f44747', fontSize: 11, padding: '2px 12px 4px 28px', lineHeight: 1.3 }}>
+                {newFileError}
+              </div>
+            )}
+            {newFileWarning && (
+              <div style={{ color: '#cca700', fontSize: 11, padding: '2px 12px 4px 28px', lineHeight: 1.3 }}>
+                ⚠ {newFileWarning}
+              </div>
+            )}
+          </div>
+        )}
         {rvxFiles.map(file => (
           <FileItem
             key={file.id}
@@ -269,13 +338,21 @@ export function Sidebar({
             </svg>
 
             {renamingId === file.id ? (
-              <RenameInput
-                autoFocus
-                value={renameValue}
-                onChange={(e) => setRenameValue(e.target.value)}
-                onKeyDown={(e) => handleRenameKeyDown(e, file.id)}
-                onBlur={() => commitRename(file.id)}
-              />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <RenameInput
+                  autoFocus
+                  value={renameValue}
+                  onChange={(e) => setRenameValue(e.target.value)}
+                  onKeyDown={(e) => handleRenameKeyDown(e, file.id)}
+                  onBlur={() => commitRename(file.id)}
+                  style={renameError ? { borderColor: '#f44747', outline: '1px solid #f44747' } : {}}
+                />
+                {renameError && (
+                  <div style={{ color: '#f44747', fontSize: 11, marginTop: 2, lineHeight: 1.3 }}>
+                    {renameError}
+                  </div>
+                )}
+              </div>
             ) : (
               file.name
             )}
