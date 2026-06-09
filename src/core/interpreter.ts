@@ -29,7 +29,7 @@ export function interpret(ast: any, env: Environment, rover: Rover): any {
     let isConditionMet = false;
 
     if (ast.condition && ast.condition.type === "Identifier" && ast.condition.value === "obstacle") {
-      isConditionMet = rover.detectObstacle(0, 0);
+      isConditionMet = rover.detectObstacle(0, 1);
     } else if (ast.condition) {
       const conditionValue = interpret(ast.condition, env, rover);
       isConditionMet = !!conditionValue;
